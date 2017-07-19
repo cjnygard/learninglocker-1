@@ -54,7 +54,7 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
 		fi
 		echo "SSLCertificateKeyFile /var/www/certs/$APP_URL.key" >> /etc/apache2/apache2.conf
 		echo "SSLCertificateFile /var/www/certs/$APP_URL.crt" >> /etc/apache2/apache2.conf
-		echo "SSLCertificateChainFile /var/www/certs/$APP_URL.ca-bundle" >> /etc/apache2/apache2.conf
+		echo "SSLCACertificateFile /var/www/certs/$APP_URL.ca-bundle" >> /etc/apache2/apache2.conf
 		chmod 700 /var/www/certs
 		chmod 600 /var/www/certs/*
 	fi
@@ -66,9 +66,15 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
 	echo 'Done, and awake now.'
 
 	# If we're linked to MongoDB and thus have credentials already, let's use them
-	LEARNINGLOCKER_DB_USER="${MONGO_ENV_MONGODB_USER:=learninglocker}"
-	LEARNINGLOCKER_DB_PASSWORD="${MONGO_ENV_MONGODB_PASS:=learninglocker}"
-	LEARNINGLOCKER_DB_NAME="${MONGO_ENV_MONGODB_DATABASE:=learninglocker}"
+        if [ -z "$LEARNINGLOCKER_DB_USER" ]; then
+	    LEARNINGLOCKER_DB_USER="${MONGO_ENV_MONGODB_USER:=learninglocker}"
+        fi
+        if [ -z "$LEARNINGLOCKER_DB_PASSWORD" ]; then
+	    LEARNINGLOCKER_DB_PASSWORD="${MONGO_ENV_MONGODB_PASS:=learninglocker}"
+        fi
+        if [ -z "$LEARNINGLOCKER_DB_NAME" ]; then
+	    LEARNINGLOCKER_DB_NAME="${MONGO_ENV_MONGODB_DATABASE:=learninglocker}"
+        fi
 
 	if [ -z "$LEARNINGLOCKER_DB_PASSWORD" ]; then
 		echo >&2 'error: missing required LEARNINGLOCKER_DB_PASSWORD environment variable'
@@ -104,6 +110,7 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
 		cat > app/config/local/app.php <<-EOF
 			<?php
 			return [
+				'debug' => false,
 				'key' => '$APP_SECRET_KEY',
 				'url' => 'https://$APP_URL'
 			];

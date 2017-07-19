@@ -1,27 +1,50 @@
-web:
-  container_name: learninglocker-web
-  build: .
-  links:
-    - db:mongo
-  hostname: lrs.docker.dev
-  environment:
-    APP_URL: 'lrs.docker.dev'
-    APP_SECRET_KEY: 'CHANGEME12345678'
-    SMTP_SERVER: 'smtp.sendgrid.net'
-    SMTP_PORT: 587
-    SMTP_USER: 'your own'
-    SMTP_PASSWORD: 'your own'
-    EMAIL_FROM_NAME: 'Learning Locker LRS Docker Container'
-    EMAIL_FROM_ADDRESS: 'lrs@lrs.docker.dev'
-  ports:
-    - "443:443"
-db:
-  container_name: learninglocker-db
-  image: tutum/mongodb:3.2
-  environment:
-    MONGODB_DATABASE: 'learninglocker'
-    MONGODB_USER: 'learninglocker'
-    MONGODB_PASS: 'learninglocker'
-  ports:
-    - "27017:27017"
-    - "28017:28017"
+version: "2"
+
+volumes:
+  vmongo:
+
+networks:
+  internal:
+  external:
+
+services:
+
+  lrs:
+    container_name: lrs-web
+    build: .
+    hostname: fixme.com
+    environment:
+      APP_URL: 'fixme.com'
+      APP_SECRET_KEY: 'fixme-max-32-char-string'
+      APP_DEBUG: 'false'
+      SMTP_SERVER: 'smtp.sendgrid.net'
+      SMTP_PORT: 587
+      SMTP_USER: 'apikey'
+      SMTP_PASSWORD: 'fixme-your-api-key-here'
+      EMAIL_FROM_NAME: 'LRS'
+      EMAIL_FROM_ADDRESS: 'lrs@fixme.com'
+      LEARNINGLOCKER_DB_HOST: 'mongo'
+      LEARNINGLOCKER_DB_NAME: 'lrs'
+      LEARNINGLOCKER_DB_USER: 'fixme'
+      LEARNINGLOCKER_DB_PASSWORD: 'fixme'
+    ports:
+      - "443:443"
+      - "80:80"
+    networks:
+      internal:
+      external:
+
+  mongo:
+    container_name: lrs-db
+    image: tutum/mongodb:3.2
+    environment:
+      MONGODB_DATABASE: 'lrs'
+      MONGODB_USER: 'fixme'
+      MONGODB_PASS: 'fixme'
+    volumes:
+      - vmongo:/data/db
+    expose:
+      - 27018
+      - 28017
+    networks:
+      internal:
